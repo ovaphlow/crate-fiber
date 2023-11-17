@@ -12,7 +12,7 @@ import (
 )
 
 func Serve(addr string) {
-	// init database
+	InitMySQL()
 
 	app := fiber.New(fiber.Config{
 		Prefork:   true,

@@ -46,15 +46,12 @@ func EventsFilter(relationId int64, referenceId int64, tags []string, detail str
 	order by id desc
 	limit %d, %d
 	`, q, skip, take)
-	log.Println(q)
-	log.Println(params)
-	p := make([]interface{}, len(params))
-	for i := range params {
-		p[i] = &params[i]
+	statement, err := MySQL.Prepare(q)
+	if err != nil {
+		return nil, err
 	}
-	log.Println(p)
-	rows, err := MySQL.Query("select 1")
-	// rows, err := utilities.MySQL.Query(q)
+	defer statement.Close()
+	rows, err := statement.Query(params...)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
@@ -63,7 +60,7 @@ func EventsFilter(relationId int64, referenceId int64, tags []string, detail str
 	var result []Event
 	for rows.Next() {
 		var row Event
-		err = rows.Scan(&row.Id, &row.RelationId, &row.ReferenceId, &row.Tags, &row.Detail, &row.Time, &row.IdStr)
+		err = rows.Scan(&row.Id, &row.RelationId, &row.ReferenceId, &row.Tags, &row.Detail, &row.Time, &row.Id_)
 		if err != nil {
 			log.Println(err.Error())
 			return nil, err
