@@ -1,4 +1,4 @@
-package events
+package main
 
 type Event struct {
 	Id          int64  `json:"id"`

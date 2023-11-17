@@ -1,8 +1,7 @@
-package http
+package main
 
 import (
 	"log"
-	"ovaphlow/crate/internal/events"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -45,7 +44,7 @@ func Serve(addr string) {
 		})
 	})
 
-	app.Get("/crate-api/events", events.EventsEndpointGet)
+	app.Get("/crate-api/events", EventsEndpointGet)
 
 	log.Fatal(app.Listen(addr))
 }

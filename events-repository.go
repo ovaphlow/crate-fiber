@@ -1,15 +1,14 @@
-package events
+package main
 
 import (
 	"fmt"
 	"log"
-	"ovaphlow/crate/internal/utilities"
 	"strings"
 )
 
 var columns = []string{"id", "relation_id", "reference_id", "tags", "detail", "time"}
 
-func Filter(relationId int64, referenceId int64, tags []string, detail string, timeRange []string, skip int64, take int) ([]Event, error) {
+func EventsFilter(relationId int64, referenceId int64, tags []string, detail string, timeRange []string, skip int64, take int) ([]Event, error) {
 	q := fmt.Sprintf(`
 	select %s, cast(id as char) _id
 	from crate.events
@@ -54,7 +53,7 @@ func Filter(relationId int64, referenceId int64, tags []string, detail string, t
 		p[i] = &params[i]
 	}
 	log.Println(p)
-	rows, err := utilities.MySQL.Query("select 1")
+	rows, err := MySQL.Query("select 1")
 	// rows, err := utilities.MySQL.Query(q)
 	if err != nil {
 		log.Println(err.Error())

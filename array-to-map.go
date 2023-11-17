@@ -1,4 +1,4 @@
-package utilities
+package main
 
 func SliceToMap(array []string) map[string]string {
 	var mapResult = make(map[string]string)
