@@ -11,7 +11,7 @@ var columns = []string{"id", "relation_id", "reference_id", "tags", "detail", "t
 func EventsFilter(relationId int64, referenceId int64, tags []string, detail string, timeRange []string, skip int64, take int) ([]Event, error) {
 	q := fmt.Sprintf(`
 	select %s, cast(id as char) _id
-	from crate.events
+	from events
 	`, strings.Join(columns, ","))
 	var conditions []string
 	var params []interface{}
