@@ -13,7 +13,7 @@ var MySQL *sql.DB
 
 func InitMySQL() {
 	var err error
-	MySQL, err = sql.Open("mysql", "ovaphlow:ovaph@QH.1123@tcp(82.156.226.151:3306)/crate?charset=utf8mb4&parseTime=True&loc=Local")
+	MySQL, err = sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crate?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Println(err.Error())
 	}
