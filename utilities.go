@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+func SliceToMap(slice []string) map[string]string {
+	var result = make(map[string]string)
+	for i := 0; i < len(slice); i += 2 {
+		result[slice[i]] = slice[i+1]
+	}
+	return result
+}
+
 func StringToMap(s string) (map[string]interface{}, error) {
 	items := strings.Split(s, ",")
 	if len(items)%2 != 0 {
