@@ -29,6 +29,11 @@ func EventsEndpointGet(c *fiber.Ctx) error {
 			} else {
 				tags = []string{}
 			}
+			detail, err := StringToMap(c.Query("detail", ""))
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
+			}
 			timeRange := []string{}
 			if c.Query("timeRange", "") != "" {
 				timeRange = strings.Split(c.Query("timeRangeBegin", ""), ",")
@@ -46,7 +51,7 @@ func EventsEndpointGet(c *fiber.Ctx) error {
 				log.Println(err.Error())
 				return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
 			}
-			result, err := EventsFilter(relationId, referenceId, tags, c.Query("detail", ""), timeRange, skip, take)
+			result, err := EventsFilter(relationId, referenceId, tags, detail, timeRange, skip, take)
 			if err != nil {
 				log.Println(err.Error())
 				return c.Status(500).JSON(fiber.Map{"message": "服务器错误"})

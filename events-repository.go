@@ -8,7 +8,7 @@ import (
 
 var columns = []string{"id", "relation_id", "reference_id", "tags", "detail", "time"}
 
-func EventsFilter(relationId int64, referenceId int64, tags []string, detail string, timeRange []string, skip int64, take int) ([]Event, error) {
+func EventsFilter(relationId int64, referenceId int64, tags []string, detail map[string]interface{}, timeRange []string, skip int64, take int) ([]Event, error) {
 	q := fmt.Sprintf(`
 	select %s, cast(id as char) _id
 	from events
@@ -27,9 +27,9 @@ func EventsFilter(relationId int64, referenceId int64, tags []string, detail str
 		conditions = append(conditions, "json_contains(tags, json_array(?))")
 		params = append(params, tag)
 	}
-	if detail != "" {
-		conditions = append(conditions, "json_contains(detail, ?)")
-		params = append(params, detail)
+	for k, v := range detail {
+		conditions = append(conditions, "json_contains(detail, json_object(?, ?))")
+		params = append(params, k, v)
 	}
 	if len(timeRange) == 2 {
 		conditions = append(conditions, "time > ?", "time < ?")
@@ -66,6 +66,9 @@ func EventsFilter(relationId int64, referenceId int64, tags []string, detail str
 			return nil, err
 		}
 		result = append(result, row)
+	}
+	if len(result) == 0 {
+		return []Event{}, nil
 	}
 	return result, nil
 }
