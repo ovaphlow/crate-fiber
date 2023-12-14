@@ -66,7 +66,10 @@ func (cb *ConditionBuilder) InBuilder(in []string) {
 	for i := range c {
 		c[i] = "?"
 	}
-	cb.Conditions = append(cb.Conditions, fmt.Sprintf("%s in (%s)", in[0], strings.Join(c, ", ")))
+	cb.Conditions = append(
+		cb.Conditions,
+		fmt.Sprintf("%s in (%s)", in[0], strings.Join(c, ", ")),
+	)
 	params := make([]interface{}, len(in)-1)
 	for i := range params {
 		params[i] = in[i+1]
