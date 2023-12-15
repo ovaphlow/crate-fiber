@@ -61,6 +61,40 @@ func (cb *ConditionBuilder) LikeBuilder(like []string) {
 	}
 }
 
+func (cb *ConditionBuilder) ObjectLikeBuilder(objectLike []string) {
+	for i := 0; i < len(objectLike); i += 3 {
+		cb.Conditions = append(
+			cb.Conditions,
+			fmt.Sprintf(
+				"position(? in %s->>'$.%s')",
+				objectLike[i],
+				objectLike[i+1],
+			),
+		)
+		cb.Params = append(cb.Params, objectLike[i+2])
+	}
+}
+
+func (cb *ConditionBuilder) LesserBuilder(lesser []string) {
+	for i := 0; i < len(lesser); i += 2 {
+		cb.Conditions = append(
+			cb.Conditions,
+			fmt.Sprintf("%s <= ?", lesser[i]),
+		)
+		cb.Params = append(cb.Params, lesser[i+1])
+	}
+}
+
+func (cb *ConditionBuilder) GreaterBuilder(greater []string) {
+	for i := 0; i < len(greater); i += 2 {
+		cb.Conditions = append(
+			cb.Conditions,
+			fmt.Sprintf("%s >= ?", greater[i]),
+		)
+		cb.Params = append(cb.Params, greater[i+1])
+	}
+}
+
 func (cb *ConditionBuilder) InBuilder(in []string) {
 	c := make([]string, len(in)-1)
 	for i := range c {

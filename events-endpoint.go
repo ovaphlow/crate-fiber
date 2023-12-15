@@ -27,8 +27,22 @@ func EventsEndpointGet(c *fiber.Ctx) error {
 			objectContain := strings.Split(c.Query("object-contain", ""), ",")
 			arrayContain := strings.Split(c.Query("array-contain", ""), ",")
 			like := strings.Split(c.Query("like", ""), ",")
+			objectLike := strings.Split(c.Query("object-like", ""), ",")
 			in := strings.Split(c.Query("in", ""), ",")
-			result, err := EventDefaultFilter(skip, take, equal, objectContain, arrayContain, like, in)
+			lesser := strings.Split(c.Query("lesser", ""), ",")
+			greater := strings.Split(c.Query("greater", ""), ",")
+			result, err := EventDefaultFilter(
+				skip,
+				take,
+				equal,
+				objectContain,
+				arrayContain,
+				like,
+				objectLike,
+				in,
+				lesser,
+				greater,
+			)
 			if err != nil {
 				slogger.Error(err.Error())
 				return c.Status(500).JSON(fiber.Map{"message": "服务器错误"})

@@ -15,7 +15,10 @@ func EventDefaultFilter(
 	objectContain []string,
 	arrayContain []string,
 	like []string,
+	objectLike []string,
 	in []string,
+	lesser []string,
+	greater []string,
 ) ([]Event, error) {
 	q := fmt.Sprintf(`select %s from events`, strings.Join(columns, ", "))
 	var conditions []string
@@ -33,8 +36,17 @@ func EventDefaultFilter(
 	if len(like) > 0 && len(like)%2 == 0 {
 		conditionBuilder.LikeBuilder(like)
 	}
+	if len(objectLike) > 0 && len(objectLike)%3 == 0 {
+		conditionBuilder.ObjectLikeBuilder(objectLike)
+	}
 	if len(in) >= 2 {
 		conditionBuilder.InBuilder(in)
+	}
+	if len(lesser) > 0 && len(lesser)%2 == 0 {
+		conditionBuilder.LesserBuilder(lesser)
+	}
+	if len(greater) > 0 && len(greater)%2 == 0 {
+		conditionBuilder.GreaterBuilder(greater)
 	}
 	if len(conditionBuilder.Conditions) > 0 {
 		var where string
