@@ -44,7 +44,7 @@ func Serve(addr string) {
 		})
 	})
 
-	app.Get("/crate-api/events", EventsEndpointGet)
+	app.Get("/crate-api/events", EventEndpointGet)
 
 	log.Fatal(app.Listen(addr))
 }
