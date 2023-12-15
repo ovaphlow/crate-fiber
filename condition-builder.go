@@ -75,6 +75,22 @@ func (cb *ConditionBuilder) ObjectLikeBuilder(objectLike []string) {
 	}
 }
 
+func (cb *ConditionBuilder) InBuilder(in []string) {
+	c := make([]string, len(in)-1)
+	for i := range c {
+		c[i] = "?"
+	}
+	cb.Conditions = append(
+		cb.Conditions,
+		fmt.Sprintf("%s in (%s)", in[0], strings.Join(c, ", ")),
+	)
+	params := make([]interface{}, len(in)-1)
+	for i := range params {
+		params[i] = in[i+1]
+	}
+	cb.Params = append(cb.Params, params...)
+}
+
 func (cb *ConditionBuilder) LesserBuilder(lesser []string) {
 	for i := 0; i < len(lesser); i += 2 {
 		cb.Conditions = append(
@@ -93,22 +109,6 @@ func (cb *ConditionBuilder) GreaterBuilder(greater []string) {
 		)
 		cb.Params = append(cb.Params, greater[i+1])
 	}
-}
-
-func (cb *ConditionBuilder) InBuilder(in []string) {
-	c := make([]string, len(in)-1)
-	for i := range c {
-		c[i] = "?"
-	}
-	cb.Conditions = append(
-		cb.Conditions,
-		fmt.Sprintf("%s in (%s)", in[0], strings.Join(c, ", ")),
-	)
-	params := make([]interface{}, len(in)-1)
-	for i := range params {
-		params[i] = in[i+1]
-	}
-	cb.Params = append(cb.Params, params...)
 }
 
 func (cb *ConditionBuilder) Build() (string, []interface{}) {
