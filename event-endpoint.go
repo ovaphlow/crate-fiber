@@ -23,26 +23,17 @@ func EventEndpointGet(c *fiber.Ctx) error {
 				log.Println(err.Error())
 				return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
 			}
-			equal := strings.Split(c.Query("equal", ""), ",")
-			objectContain := strings.Split(c.Query("object-contain", ""), ",")
-			arrayContain := strings.Split(c.Query("array-contain", ""), ",")
-			like := strings.Split(c.Query("like", ""), ",")
-			objectLike := strings.Split(c.Query("object-like", ""), ",")
-			in := strings.Split(c.Query("in", ""), ",")
-			lesser := strings.Split(c.Query("lesser", ""), ",")
-			greater := strings.Split(c.Query("greater", ""), ",")
-			result, err := EventDefaultFilter(
-				skip,
-				take,
-				equal,
-				objectContain,
-				arrayContain,
-				like,
-				objectLike,
-				in,
-				lesser,
-				greater,
-			)
+			op := map[string]interface{}{
+				"equal":         strings.Split(c.Query("equal", ""), ","),
+				"objectContain": strings.Split(c.Query("object-contain", ""), ","),
+				"arrayContain":  strings.Split(c.Query("array-contain", ""), ","),
+				"like":          strings.Split(c.Query("like", ""), ","),
+				"objectLike":    strings.Split(c.Query("object-like", ""), ","),
+				"in":            strings.Split(c.Query("in", ""), ","),
+				"lesser":        strings.Split(c.Query("lesser", ""), ","),
+				"greater":       strings.Split(c.Query("greater", ""), ","),
+			}
+			result, err := Retrieve("event", skip, take, op)
 			if err != nil {
 				slogger.Error(err.Error())
 				return c.Status(500).JSON(fiber.Map{"message": "服务器错误"})
@@ -52,12 +43,20 @@ func EventEndpointGet(c *fiber.Ctx) error {
 			}
 			var response []EventExtended
 			for _, it := range result {
-				response = append(response, EventExtended{
-					Event:        it,
-					Id_:          strconv.FormatInt(it.Id, 10),
-					RelationId_:  strconv.FormatInt(it.RelationId, 10),
-					ReferenceId_: strconv.FormatInt(it.ReferenceId, 10),
-				})
+				extendedEvent := EventExtended{
+					Event: Event{
+						Id:          it["id"].(int64),
+						RelationId:  it["relation_id"].(int64),
+						ReferenceId: it["reference_id"].(int64),
+						Tags:        it["tags"].(string),
+						Detail:      it["detail"].(string),
+						Time:        it["time"].(string),
+					},
+					Id_:          strconv.FormatInt(it["id"].(int64), 10),
+					RelationId_:  strconv.FormatInt(it["relation_id"].(int64), 10),
+					ReferenceId_: strconv.FormatInt(it["reference_id"].(int64), 10),
+				}
+				response = append(response, extendedEvent)
 			}
 			return c.JSON(response)
 		}
