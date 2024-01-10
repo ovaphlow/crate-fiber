@@ -1,3 +1,3 @@
 package main
 
-const HEADER_API_VERSION = "X-API-Version"
+const HEADER_API_VERSION = "x-api-version"
