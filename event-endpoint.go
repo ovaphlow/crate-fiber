@@ -76,6 +76,7 @@ func EventEndpointGet(c *fiber.Ctx) error {
 				}
 				response = append(response, extendedEvent)
 			}
+			c.Set(HEADER_API_VERSION, "2024-01-06")
 			return c.JSON(response)
 		}
 	}

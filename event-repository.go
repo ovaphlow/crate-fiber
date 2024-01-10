@@ -8,10 +8,7 @@ import (
 
 var columns = []string{"id", "relation_id", "reference_id", "tags", "detail", "time"}
 
-func EventDefaultFilter(
-	option RetrieveOption,
-	filter RetrieveFilter,
-) ([]Event, error) {
+func EventDefaultFilter(option RetrieveOption, filter RetrieveFilter) ([]Event, error) {
 	q := fmt.Sprintf(`select %s from events`, strings.Join(columns, ", "))
 	var conditions []string
 	var params []string
