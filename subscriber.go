@@ -33,7 +33,8 @@ type Subscriber struct {
 	Time   string
 }
 
-func endpointGetByParams(c *fiber.Ctx) error {
+func endpointGetWithParams(c *fiber.Ctx) error {
+	c.Set(HEADER_API_VERSION, "2024-01-06")
 	id := c.Params("id", "")
 	uuid := c.Params("uuid", "")
 	if id == "" || uuid == "" {
@@ -65,6 +66,7 @@ func endpointGetByParams(c *fiber.Ctx) error {
 }
 
 func endpointRefreshJwt(c *fiber.Ctx) error {
+	c.Set(HEADER_API_VERSION, "2024-01-06")
 	type Body struct {
 		Token string `json:"token"`
 	}
@@ -109,6 +111,7 @@ func endpointRefreshJwt(c *fiber.Ctx) error {
 }
 
 func endpointSignIn(c *fiber.Ctx) error {
+	c.Set(HEADER_API_VERSION, "2024-01-06")
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("加载环境变量失败")
@@ -169,6 +172,7 @@ func endpointSignIn(c *fiber.Ctx) error {
 }
 
 func endpointSignUp(c *fiber.Ctx) error {
+	c.Set(HEADER_API_VERSION, "2024-01-06")
 	type SignUpBody struct {
 		Email    string `json:"email"`
 		Name     string `json:"name"`
