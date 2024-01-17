@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"regexp"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -9,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/golang-jwt/jwt"
 )
 
 func Serve(addr string) {
@@ -34,7 +38,25 @@ func Serve(addr string) {
 	app.Use(recover.New())
 
 	app.Use(func(c *fiber.Ctx) error {
-		// uri 过滤
+		for _, item := range PUBLIC_URIS {
+			match, _ := regexp.MatchString(item, c.Path())
+			if match {
+				slogger.Info("public uri", "match", c.Path())
+				return c.Next()
+			}
+		}
+		auth := c.Get("Authorization")
+		auth = strings.Replace(auth, "Bearer ", "", 1)
+		token, err := jwt.Parse(auth, func(token *jwt.Token) (interface{}, error) {
+			return []byte(strings.ReplaceAll(os.Getenv("JWT_KEY"), " ", "")), nil
+		})
+		if err != nil {
+			slogger.Error(err.Error())
+			return c.Status(401).JSON(fiber.Map{"message": "用户凭证异常"})
+		}
+		if !token.Valid {
+			return c.Status(401).JSON(fiber.Map{"message": "用户凭证异常"})
+		}
 		return c.Next()
 	})
 
@@ -45,6 +67,10 @@ func Serve(addr string) {
 	})
 
 	app.Get("/crate-api/event", EventEndpointGet)
+	app.Post("/crate-api/subscriber/refresh-jwt", endpointRefreshJwt)
+	app.Post("/crate-api/subscriber/sign-in", endpointSignIn)
+	app.Post("/crate-api/subscriber/sign-up", endpointSignUp)
+	app.Get("/crate-api/subscriber/:uuid/:id", endpointGetByParams)
 
 	log.Fatal(app.Listen(addr))
 }

@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-var columns = []string{"id", "relation_id", "reference_id", "tags", "detail", "time"}
+var eventColumns = []string{"id", "relation_id", "reference_id", "tags", "detail", "time"}
 
 func EventDefaultFilter(option RetrieveOption, filter RetrieveFilter) ([]Event, error) {
-	q := fmt.Sprintf(`select %s from events`, strings.Join(columns, ", "))
+	q := fmt.Sprintf(`select %s from events`, strings.Join(eventColumns, ", "))
 	var conditions []string
 	var params []string
 	if len(filter.Equal) > 0 {
