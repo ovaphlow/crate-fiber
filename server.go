@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -18,12 +19,16 @@ import (
 func Serve(addr string) {
 	InitMySQL()
 
+	InitPostgres()
+
 	app := fiber.New(fiber.Config{
 		Prefork:   true,
 		BodyLimit: 16 * 1024 * 1024,
 	})
 
 	app.Use(compress.New())
+
+	app.Use(cors.New())
 
 	app.Use(etag.New())
 

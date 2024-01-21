@@ -21,6 +21,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
+/*
+CREATE TABLE crate.subscriber (
+	id int8 NOT NULL,
+	email varchar NOT NULL,
+	"name" varchar NOT NULL,
+	phone varchar NOT NULL,
+	tags jsonb NOT NULL,
+	detail jsonb NOT NULL,
+	"time" timestamptz NOT NULL,
+	CONSTRAINT subscriber_pk PRIMARY KEY (id)
+);
+CREATE INDEX subscriber_email_idx ON crate.subscriber USING btree (email);
+CREATE INDEX subscriber_name_idx ON crate.subscriber USING btree (name);
+CREATE INDEX subscriber_phone_idx ON crate.subscriber USING btree (phone);
+*/
+
 var subscriberColumns = []string{"id", "email", "name", "phone", "tags", "detail", "time"}
 
 type Subscriber struct {
@@ -180,11 +196,11 @@ func endpointSignUp(c *fiber.Ctx) error {
 		Password string `json:"password"`
 	}
 	var body SignUpBody
-
 	if err := c.BodyParser(&body); err != nil {
 		slogger.Error(err.Error())
 		return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
 	}
+	slogger.Info("sign up", "body", body)
 	if (body.Email == "" && body.Name == "" && body.Phone == "") || body.Password == "" {
 		return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
 	}
@@ -194,8 +210,9 @@ func endpointSignUp(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"message": "服务器错误"})
 	}
 	if subscriber != nil {
-		return c.Status(400).JSON(fiber.Map{"message": "用户名已存在"})
+		return c.Status(401).JSON(fiber.Map{"message": "用户名已存在"})
 	}
+	slogger.Info("sign up", "subscriber", subscriber)
 	subscriber = &Subscriber{
 		Email: body.Email,
 		Name:  body.Name,
@@ -222,12 +239,10 @@ func endpointSignUp(c *fiber.Ctx) error {
 
 func repoCreateSubscriber(subscriber *Subscriber) error {
 	q := fmt.Sprintf(
-		`
-		insert into subscribers (%s) values (?, ?, ?, ?, ?, ?, ?)
-		`,
+		"insert into crate.subscriber (%s) values ($1, $2, $3, $4, $5, $6, $7)",
 		strings.Join(subscriberColumns, ", "),
 	)
-	statement, err := MySQL.Prepare(q)
+	statement, err := Postgres.Prepare(q)
 	if err != nil {
 		return err
 	}
@@ -255,13 +270,13 @@ func repoCreateSubscriber(subscriber *Subscriber) error {
 func repoRetrieveSubscriberById(id int64, uuid string) (*Subscriber, error) {
 	q := fmt.Sprintf(
 		`
-		select %s from subscribers
-		where id = ? and json_contains(detail, json_object('uuid', ?))
+		select %s from crate.subscriber
+		where id = $1 and json_contains(detail, json_object('uuid', $2))
 		limit 1
 		`,
 		strings.Join(subscriberColumns, ", "),
 	)
-	statement, err := MySQL.Prepare(q)
+	statement, err := Postgres.Prepare(q)
 	if err != nil {
 		return nil, err
 	}
@@ -287,16 +302,16 @@ func repoRetrieveSubscriberById(id int64, uuid string) (*Subscriber, error) {
 
 func repoRetrieveSubscriberByUsername(username string) (*Subscriber, error) {
 	q := fmt.Sprintf(
-		`
-		select %s from subscribers
-		where email = ? or name = ? or phone = ?
-		`,
+		"select %s from crate.subscriber where email = $1 or name = $2 or phone = $3",
 		strings.Join(subscriberColumns, ", "),
 	)
-	statement, err := MySQL.Prepare(q)
+	slogger.Info("subscriber", "q", q)
+	statement, err := Postgres.Prepare(q)
+	slogger.Info("2")
 	if err != nil {
 		return nil, err
 	}
+	slogger.Info("3")
 	defer statement.Close()
 	result, err := statement.Query(username, username, username)
 	if err != nil {
