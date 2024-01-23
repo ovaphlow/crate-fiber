@@ -153,7 +153,6 @@ func endpointSignIn(c *fiber.Ctx) error {
 	if subscriber == nil {
 		return c.Status(401).JSON(fiber.Map{"message": "用户名或密码错误"})
 	}
-	slogger.Info("subscriber", "detail", subscriber.Detail)
 	var detail map[string]interface{}
 	if err := json.Unmarshal([]byte(subscriber.Detail), &detail); err != nil {
 		slogger.Error(err.Error())
@@ -164,12 +163,10 @@ func endpointSignIn(c *fiber.Ctx) error {
 		slogger.Error("salt is not string")
 		return c.Status(500).JSON(fiber.Map{"message": "服务器错误"})
 	}
-	slogger.Info("subscriber", "salt", salt)
 	key := []byte(salt)
 	r := hmac.New(sha256.New, key)
 	r.Write([]byte(body.Password))
 	sha := hex.EncodeToString(r.Sum(nil))
-	slogger.Info("subscriber", "sha", sha)
 	if sha != detail["sha"] {
 		return c.Status(401).JSON(fiber.Map{"message": "用户名或密码错误"})
 	}
@@ -200,7 +197,6 @@ func endpointSignUp(c *fiber.Ctx) error {
 		slogger.Error(err.Error())
 		return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
 	}
-	slogger.Info("sign up", "body", body)
 	if (body.Email == "" && body.Name == "" && body.Phone == "") || body.Password == "" {
 		return c.Status(400).JSON(fiber.Map{"message": "参数错误"})
 	}
@@ -212,7 +208,6 @@ func endpointSignUp(c *fiber.Ctx) error {
 	if subscriber != nil {
 		return c.Status(401).JSON(fiber.Map{"message": "用户名已存在"})
 	}
-	slogger.Info("sign up", "subscriber", subscriber)
 	subscriber = &Subscriber{
 		Email: body.Email,
 		Name:  body.Name,
@@ -305,13 +300,10 @@ func repoRetrieveSubscriberByUsername(username string) (*Subscriber, error) {
 		"select %s from crate.subscriber where email = $1 or name = $2 or phone = $3",
 		strings.Join(subscriberColumns, ", "),
 	)
-	slogger.Info("subscriber", "q", q)
 	statement, err := Postgres.Prepare(q)
-	slogger.Info("2")
 	if err != nil {
 		return nil, err
 	}
-	slogger.Info("3")
 	defer statement.Close()
 	result, err := statement.Query(username, username, username)
 	if err != nil {
