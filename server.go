@@ -75,6 +75,7 @@ func Serve(addr string) {
 	app.Post("/crate-api/subscriber/refresh-jwt", endpointRefreshJwt)
 	app.Post("/crate-api/subscriber/sign-in", endpointSignIn)
 	app.Post("/crate-api/subscriber/sign-up", endpointSignUp)
+	app.Post("/crate-api/subscriber/validate-token", endpointValidateToken)
 	app.Get("/crate-api/subscriber/:uuid/:id", endpointGetWithParams)
 
 	log.Fatal(app.Listen(addr))
